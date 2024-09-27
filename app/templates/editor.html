@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Редактор видео</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/editor.js"></script>
+</head>
+<body>
+    <h1>Редактор видео</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="fileInput">Загрузить видео:</label>
+        <input type="file" id="fileInput" name="file">
+        <button type="submit">Загрузить и обработать</button>
+    </form>
+    <div id="clipsContainer"></div>
+</body>
+</html>

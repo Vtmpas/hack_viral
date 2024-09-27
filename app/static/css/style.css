@@ -1,0 +1,39 @@
+/* app/static/css/style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+h1 {
+    color: #333;
+}
+
+#uploadForm {
+    margin-bottom: 20px;
+}
+
+.clip {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.clip video {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.clip p {
+    margin: 5px 0;
+}
+
+.clip input[type="text"], .clip textarea {
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.clip button {
+    margin-top: 10px;
+}
