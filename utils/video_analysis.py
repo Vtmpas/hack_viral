@@ -4,72 +4,89 @@ import cv2
 import logging
 import numpy as np
 import torch
-from torchvision.models.detection import fasterrcnn_resnet50_fpn
-from torchvision.transforms import functional as F
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification
+from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_320_fpn
+from transformers import AutoFeatureExtractor
+import psutil
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 
-def analyze_video_advanced(video_path):
-    try:
-        cap = cv2.VideoCapture(video_path)
-        frame_rate = cap.get(cv2.CAP_PROP_FPS)
-        
-        # Загрузка моделей
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        object_detection_model = fasterrcnn_resnet50_fpn(pretrained=True).to(device)
-        object_detection_model.eval()
-        
-        scene_classification_extractor = AutoFeatureExtractor.from_pretrained("microsoft/resnet-50")
-        scene_classification_model = AutoModelForImageClassification.from_pretrained("microsoft/resnet-50").to(device)
-        scene_classification_model.eval()
-        
-        video_events = []
-        frame_idx = 0
-        
-        while cap.isOpened():
+# Загрузка моделей один раз при импорте модуля
+object_detection_model = fasterrcnn_mobilenet_v3_large_320_fpn(pretrained=True).eval()
+feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/resnet-18")
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+object_detection_model.to(device)
+
+def preprocess_image(frame):
+    return cv2.resize(frame, (800, 800))
+
+async def check_available_memory():
+    return psutil.virtual_memory().percent < 90
+
+def process_frame(frame, timestamp):
+    image = preprocess_image(frame)
+    with torch.no_grad():
+        predictions = object_detection_model([torch.from_numpy(image).permute(2, 0, 1).float().to(device)])
+    
+    objects = []
+    for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
+        if score > 0.5:
+            objects.append({
+                'label': COCO_INSTANCE_CATEGORY_NAMES[label],
+                'score': float(score),
+                'box': box.tolist()
+            })
+    
+    return {
+        'timestamp': timestamp,
+        'objects': objects
+    }
+
+async def analyze_video_advanced(video_path, step=30):
+    cap = cv2.VideoCapture(video_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    video_events = []
+    with ThreadPoolExecutor() as executor:
+        for frame_count in range(0, total_frames, step):
+            if not await check_available_memory():
+                break
+            
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_count)
             ret, frame = cap.read()
             if not ret:
                 break
             
-            timestamp = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0  # в секундах
+            timestamp = frame_count / fps
+            event = await asyncio.get_event_loop().run_in_executor(
+                executor, process_frame, frame, timestamp
+            )
+            video_events.append(event)
             
-            if frame_idx % int(frame_rate) == 0:  # анализируем каждый секундный кадр
-                # Подготовка изображения для object detection
-                img_tensor = F.to_tensor(frame).unsqueeze(0).to(device)
-                
-                # Object detection
-                with torch.no_grad():
-                    object_detection_output = object_detection_model(img_tensor)[0]
-                
-                detected_objects = []
-                for box, label, score in zip(object_detection_output['boxes'], object_detection_output['labels'], object_detection_output['scores']):
-                    if score > 0.5:  # фильтруем объекты с низкой уверенностью
-                        detected_objects.append({
-                            'label': label.item(),
-                            'score': score.item(),
-                            'box': box.tolist()
-                        })
-                
-                # Scene classification
-                inputs = scene_classification_extractor(images=frame, return_tensors="pt").to(device)
-                with torch.no_grad():
-                    scene_output = scene_classification_model(**inputs)
-                
-                scene_logits = scene_output.logits
-                scene_pred = torch.argmax(scene_logits, dim=1).item()
-                
-                video_events.append({
-                    'timestamp': timestamp,
-                    'detected_objects': detected_objects,
-                    'scene_classification': scene_pred
-                })
+            logger.debug(f"Обработан кадр {frame_count}/{total_frames}, найдено объектов: {len(event['objects'])}")
             
-            frame_idx += 1
-        
-        cap.release()
-        logger.info("Видео успешно проанализировано с расширенными возможностями")
-        return video_events
-    except Exception as e:
-        logger.exception("Ошибка в analyze_video_advanced")
-        raise
+            await asyncio.sleep(0)
+    
+    logger.info(f"Всего обработано кадров: {len(video_events)}, найдено объектов: {sum(len(e['objects']) for e in video_events)}")
+    cap.release()
+    return video_events
+
+# Остальные функции остаются без изменений
+
+COCO_INSTANCE_CATEGORY_NAMES = [
+    '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
+    'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
+    'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+    'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella', 'N/A', 'N/A',
+    'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
+    'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
+    'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
+    'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
+    'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A', 'dining table',
+    'N/A', 'N/A', 'toilet', 'N/A', 'TV', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+    'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
+    'clock', 'vase', 'scissors', 'teddy bear', 'hair dryer', 'toothbrush'
+]

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Редактор видео</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <script src="/static/js/editor.js"></script>
 </head>
 <body>
     <h1>Редактор видео</h1>
@@ -13,6 +12,9 @@
         <input type="file" id="fileInput" name="file">
         <button type="submit">Загрузить и обработать</button>
     </form>
+    <div id="loadingIndicator" style="display: none;">Обработка видео...</div>
+    <div id="progressInfo"></div>
     <div id="clipsContainer"></div>
+    <script src="/static/js/editor.js"></script>
 </body>
 </html>

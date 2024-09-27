@@ -20,8 +20,8 @@ h1 {
 }
 
 .clip video {
-    display: block;
-    margin-bottom: 10px;
+    max-width: 100%;
+    height: auto;
 }
 
 .clip p {
@@ -30,10 +30,17 @@ h1 {
 
 .clip input[type="text"], .clip textarea {
     width: 100%;
-    padding: 5px;
-    box-sizing: border-box;
+    margin-bottom: 10px;
 }
 
 .clip button {
-    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+}
+
+.clip button:hover {
+    background-color: #45a049;
 }

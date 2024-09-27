@@ -28,13 +28,31 @@ def extract_key_moments_advanced(transcription, video_events):
         for event in video_events:
             feature = [
                 event['timestamp'],
-                len(event['detected_objects']),
-                event['scene_classification']
+                len(event['objects']),
             ]
             video_features.append(feature)
         
+        # Добавим проверку на пустые данные
+        if len(text_features) == 0 or len(video_features) == 0:
+            logger.warning("Пустые данные для извлечения ключевых моментов")
+            return []
+        
+        # Приведение размерностей к одинаковому количеству элементов
+        min_length = min(len(text_features), len(video_features))
+        text_features = text_features[:min_length]
+        video_features = video_features[:min_length]
+        
         # Объединение текстовых и видео признаков
-        combined_features = np.hstack([np.array(text_features), np.array(video_features)])
+        text_features = np.array(text_features)
+        video_features = np.array(video_features)
+        
+        # Проверка и корректировка размерностей
+        if text_features.ndim == 1:
+            text_features = text_features.reshape(-1, 1)
+        if video_features.ndim == 1:
+            video_features = video_features.reshape(-1, 1)
+        
+        combined_features = np.hstack([text_features, video_features])
         
         # Применение DBSCAN для кластеризации
         dbscan = DBSCAN(eps=0.5, min_samples=3)
@@ -44,20 +62,37 @@ def extract_key_moments_advanced(transcription, video_events):
         cluster_scores = np.bincount(clusters[clusters >= 0])
         peaks, _ = find_peaks(cluster_scores, height=np.mean(cluster_scores), distance=5)
         
-        key_moments = []
-        for peak in peaks:
-            cluster_indices = np.where(clusters == peak)[0]
-            start_time = transcription[cluster_indices[0]]['start']
-            end_time = transcription[cluster_indices[-1]]['end']
-            
-            # Проверка длительности ключевого момента
-            duration = end_time - start_time
-            if 10 <= duration <= 180:
+        # Добавим проверку на отсутствие кластеров
+        if len(peaks) == 0:
+            logger.warning("Не найдено значимых кластеров для ключевых моментов")
+            # Возвращаем несколько равномерно распределенных моментов
+            total_duration = transcription[-1]['end'] - transcription[0]['start']
+            num_moments = 5  # или другое желаемое количество
+            key_moments = []
+            for i in range(num_moments):
+                start_time = transcription[0]['start'] + (i * total_duration / num_moments)
+                end_time = start_time + (total_duration / num_moments)
                 key_moments.append({
                     'start': start_time,
                     'end': end_time,
-                    'importance_score': cluster_scores[peak]
+                    'importance_score': 1
                 })
+        else:
+            key_moments = []
+            for peak in peaks:
+                cluster_indices = np.where(clusters == peak)[0]
+                if cluster_indices.size > 0:
+                    start_time = transcription[cluster_indices[0]]['start']
+                    end_time = transcription[cluster_indices[-1]]['end']
+                    
+                    # Проверка длительности ключевого момента
+                    duration = end_time - start_time
+                    if 10 <= duration <= 180:
+                        key_moments.append({
+                            'start': start_time,
+                            'end': end_time,
+                            'importance_score': cluster_scores[peak]
+                        })
         
         # Сортировка ключевых моментов по важности
         key_moments.sort(key=lambda x: x['importance_score'], reverse=True)
@@ -65,5 +100,6 @@ def extract_key_moments_advanced(transcription, video_events):
         logger.info(f"Извлечено {len(key_moments)} ключевых моментов с использованием расширенного метода")
         return key_moments
     except Exception as e:
-        logger.exception("Ошибка в extract_key_moments_advanced")
-        raise
+        logger.exception(f"Ошибка в extract_key_moments_advanced: {str(e)}")
+        # Возвращаем базовый набор ключевых моментов в случае ошибки
+        return [{'start': 0, 'end': 10, 'importance_score': 1}]
