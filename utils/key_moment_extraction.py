@@ -62,6 +62,7 @@ def extract_key_moments_advanced(transcription, num_clips=4, clip_len=15, labels
                 if  word['start'] >= clip['start']:
                     word_new = deepcopy(word)
                     word_new['start'] -= clip['start']
+                    word_new['end'] -= clip['start']
                     words_for_clip.append(word_new)
                 if word['end'] >= clip['end']:
                     break
