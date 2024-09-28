@@ -8,12 +8,6 @@ services:
       context: .
       dockerfile: ./Dockerfile
     restart: unless-stopped
-    # volumes:
-    #   - "/home/atomml/models_api_folder/.cache:/root/.cache"
-    #   - /home/atomml/models_api_folder/models:/app/comfy_ui_models 
-    #   - /home/atomml/models_api_folder/custom_nodes:/app/custom_nodes 
-    #   - /home/atomml/models_api_folder/poses:/app/poses 
-    #   - /home/atomml/models_api_folder/flux:/app/flux
     entrypoint: "uvicorn main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8009:8000"
