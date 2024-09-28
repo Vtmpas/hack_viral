@@ -1,0 +1,22 @@
+---
+name: "llava_api"
+
+services:
+  api:
+    image: videoteam/llava_api:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    volumes:
+      - "/home/atomml/models_api_folder/.cache:/root/.cache"
+    ports:
+      - "8002:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['0']
+            capabilities: [gpu]
+
