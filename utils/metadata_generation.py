@@ -75,7 +75,7 @@ def get_moment_text(transcription, start_time, end_time):
 def generate_title(moment_text):
     prompt = f"Придумайте короткое и привлекательное название для видео на основе следующего текста: {moment_text}\nНазвание:"
     completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-14B-Instruct",
+        model="Qwen/Qwen2.5-32B-Instruct",
         messages=[
             {"role": "user", "content": prompt}
         ]
@@ -86,7 +86,7 @@ def generate_title(moment_text):
 def generate_description(moment_text):
     prompt = f"Напишите краткое описание видео на основе следующего текста: {moment_text}\nОписание:"
     completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-14B-Instruct",
+        model="Qwen/Qwen2.5-32B-Instruct",
         messages=[
             {"role": "user", "content": prompt}
         ]
@@ -113,7 +113,7 @@ def generate_hashtags(text, video_events):
 def analyze_sentiment(text):
     prompt = f"Проанализируйте эмоциональную окраску следующего текста и ответьте одним словом (positive, negative или neutral): {text}"
     completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-14B-Instruct",
+        model="Qwen/Qwen2.5-32B-Instruct",
         messages=[
             {"role": "user", "content": prompt}
         ]
@@ -124,7 +124,7 @@ def analyze_sentiment(text):
 def determine_target_audience(text, video_events):
     prompt = f"Определите целевую аудиторию для видео на основе следующего текста и объектов. Ответьте одним словом (дети, подростки, взрослые или пожилые_люди): Текст: {text}, Объекты: {[obj['label'] for event in video_events for obj in event['detected_objects']]}"
     completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-14B-Instruct",
+        model="Qwen/Qwen2.5-32B-Instruct",
         messages=[
             {"role": "user", "content": prompt}
         ]

@@ -6,6 +6,7 @@ from sklearn.cluster import DBSCAN
 from transformers import AutoTokenizer, AutoModel
 import torch
 from scipy.signal import find_peaks
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +66,12 @@ def extract_key_moments_advanced(transcription, video_events):
         # Добавим проверку на отсутствие кластеров
         if len(peaks) == 0:
             logger.warning("Не найдено значимых кластеров для ключевых моментов")
-            # Возвращаем несколько равномерно распределенных моментов
             total_duration = transcription[-1]['end'] - transcription[0]['start']
-            num_moments = 5  # или другое желаемое количество
+            
+            # Динамическое определение количества моментов
+            base_num_moments = max(2, min(20, int(total_duration / 60)))  # 1 момент на каждую минуту, от 2 до 20
+            num_moments = random.randint(base_num_moments - 1, base_num_moments + 1)  # Добавляем случайность
+            
             key_moments = []
             for i in range(num_moments):
                 start_time = transcription[0]['start'] + (i * total_duration / num_moments)
@@ -75,7 +79,7 @@ def extract_key_moments_advanced(transcription, video_events):
                 key_moments.append({
                     'start': start_time,
                     'end': end_time,
-                    'importance_score': 1
+                    'importance_score': random.uniform(0.5, 1.0)  # Случайная оценка важности
                 })
         else:
             key_moments = []
@@ -96,6 +100,11 @@ def extract_key_moments_advanced(transcription, video_events):
         
         # Сортировка ключевых моментов по важности
         key_moments.sort(key=lambda x: x['importance_score'], reverse=True)
+        
+        # Ограничение количества ключевых моментов
+        max_moments = 20
+        if len(key_moments) > max_moments:
+            key_moments = sorted(key_moments, key=lambda x: x['importance_score'], reverse=True)[:max_moments]
         
         logger.info(f"Извлечено {len(key_moments)} ключевых моментов с использованием расширенного метода")
         return key_moments

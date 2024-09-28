@@ -49,7 +49,7 @@ async def upload_video(file: UploadFile = File(...)):
         with open(video_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        logger.info(f"Загруже��о видео: {video_path}")
+        logger.info(f"Загружео видео: {video_path}")
 
         # Обработка видео
         clips_info = await process_video(video_path)
@@ -113,8 +113,8 @@ async def process_video(video_path):
     clips_info = []
     for idx, clip in enumerate(processed_clips):
         clip_info = {
-            "clip_path": f"/clips/processed/{os.path.basename(clip['processed_clip_path'])}",
-            "metadata": metadata[idx]
+            "clip_path": f"/clips/modified/clip_{idx}.mp4",
+            "metadata": metadata[idx] if idx < len(metadata) else {}
         }
         clips_info.append(clip_info)
     
@@ -131,7 +131,7 @@ async def editor(request: Request):
 
 @app.get("/download_clip/")
 async def download_clip(clip_name: str):
-    clip_path = os.path.join('clips/processed/', clip_name)
+    clip_path = os.path.join('clips/modified/', clip_name)
     if os.path.exists(clip_path):
         return FileResponse(path=clip_path, filename=clip_name)
     else:
