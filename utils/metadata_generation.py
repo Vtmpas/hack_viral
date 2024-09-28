@@ -1,9 +1,9 @@
 # utils/metadata_generation.py
 
 import logging
-from collections import Counter
-import re
+import json
 from openai import OpenAI
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -15,120 +15,77 @@ client = OpenAI(
     api_key=openai_api_key,
 )
 
-def generate_metadata_advanced(transcription, key_moments, video_events):
+def generate_metadata_json(transcription):
     try:
-        metadata = []
-        for moment in key_moments:
-            try:
-                # Получение текста для данного ключевого момента
-                moment_text = get_moment_text(transcription, moment['start'], moment['end'])
-                
-                # Генерация названия
-                title = generate_title(moment_text)
-                
-                # Генерация описания
-                description = generate_description(moment_text)
-                
-                # Генерация хэштегов
-                hashtags = generate_hashtags(moment_text, video_events)
-                
-                # Анализ эмоциональной окраски
-                sentiment = analyze_sentiment(moment_text)
-                
-                # Определение целевой аудитории
-                target_audience = determine_target_audience(moment_text, video_events)
-                
-                metadata.append({
-                    'title': title,
-                    'description': description,
-                    'hashtags': hashtags,
-                    'sentiment': sentiment,
-                    'target_audience': target_audience,
-                    'start_time': moment['start'],
-                    'end_time': moment['end'],
-                    'importance_score': moment.get('importance_score', 0)
-                })
-            except Exception as e:
-                logger.error(f"Ошибка при обработке момента: {str(e)}")
-                # Добавляем базовые метаданные в случае ошибки
-                metadata.append({
-                    'title': 'Без названия',
-                    'description': 'Описание недоступно',
-                    'hashtags': [],
-                    'sentiment': 'neutral',
-                    'target_audience': 'general',
-                    'start_time': moment['start'],
-                    'end_time': moment['end'],
-                    'importance_score': moment.get('importance_score', 0)
-                })
+        prompt = create_prompt_with_examples(transcription)
         
-        logger.info("Метаданные успешно сгенерированы с использованием расширенных методов")
-        return metadata
+        completion = client.chat.completions.create(
+            model="Qwen/Qwen2.5-7B-Instruct",
+            messages=[
+                {"role": "system", "content": "Вы - эксперт по анализу видео и генерации метаданных. Создайте метаданные на основе предоставленного описания видео."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        
+        metadata_json = completion.choices[0].message.content.strip()
+        logger.info(f"Полученный ответ от GPT: {metadata_json}")
+        
+        # Удаление обрамления Markdown, если оно присутствует
+        metadata_json = re.sub(r'^```json\s*|\s*```$', '', metadata_json, flags=re.MULTILINE)
+        
+        try:
+            metadata = json.loads(metadata_json)
+            logger.info("Метаданные успешно сгенерированы в формате JSON")
+            return metadata
+        except json.JSONDecodeError as json_error:
+            logger.error(f"Ошибка парсинга JSON: {str(json_error)}")
+            logger.error(f"Проблемный JSON: {metadata_json}")
+            return {"error": "Ошибка парсинга JSON", "raw_response": metadata_json}
     except Exception as e:
-        logger.exception(f"Ошибка в generate_metadata_advanced: {str(e)}")
-        # Возвращаем пустой список метаданных в случае критической ошибки
-        return []
+        logger.exception(f"Ошибка в generate_metadata_json: {str(e)}")
+        return {"error": str(e)}
 
-def get_moment_text(transcription, start_time, end_time):
-    return ' '.join([t['text'] for t in transcription if start_time <= t['start'] < end_time or start_time < t['end'] <= end_time])
-
-def generate_title(moment_text):
-    prompt = f"Придумайте короткое и привлекательное название для видео на основе следующего текста: {moment_text}\nНазвание:"
-    completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-32B-Instruct",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-    title = completion.choices[0].message.content.strip()
-    return title[:50]  # Ограничиваем длину названия 50 символами
-
-def generate_description(moment_text):
-    prompt = f"Напишите краткое описание видео на основе следующего текста: {moment_text}\nОписание:"
-    completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-32B-Instruct",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-    description = completion.choices[0].message.content.strip()
-    return description[:200]  # Ограничиваем длину описания 200 символами
-
-def generate_hashtags(text, video_events):
-    # Извлечение ключевых слов из текста
-    words = re.findall(r'\w+', text.lower())
-    word_freq = Counter(words)
+def create_prompt_with_examples(transcription):
+    examples = [
+        {
+            "input": "Мастер-класс по приготовлению пасты карбонара. Шеф-повар показывает процесс приготовления классического итальянского блюда, объясняя каждый шаг.",
+            "output": {
+                "title": "Мастер-класс: Готовим пасту карбонара",
+                "description": "Узнайте секреты приготовления классической итальянской пасты карбонара в нашем увлекательном мастер-классе.",
+                "hashtags": ["#паста", "#карбонара", "#итальянскаякухня", "#кулинария"],
+                "sentiment": "positive",
+                "target_audience": "взрослые"
+            }
+        },
+        {
+            "input": "Лекция по основам квантовой механики. Профессор объясняет принцип неопределенности Гейзенберга и другие ключевые концепции.",
+            "output": {
+                "title": "Введение в квантовую механику",
+                "description": "Погрузитесь в мир квантовой механики и узнайте о принципе неопределенности Гейзенберга в этой увлекательной лекции.",
+                "hashtags": ["#квантоваямеханика", "#физика", "#наука", "#Гейзенберг"],
+                "sentiment": "neutral",
+                "target_audience": "взрослые"
+            }
+        }
+    ]
     
-    # Добавление информации о объектах из видео
-    for event in video_events:
-        for obj in event['detected_objects']:
-            word_freq[obj['label']] += 1
+    prompt = "На основе следующих примеров сгенерируйте метаданные для нового видео в формате JSON:\n\n"
+    for example in examples:
+        prompt += f"Описание видео: {example['input']}\n"
+        prompt += f"Метаданные: {json.dumps(example['output'], ensure_ascii=False)}\n\n"
     
-    # Фильтрация общих слов
-    common_words = set(['и', 'в', 'на', 'с', 'по', 'а', 'что', 'это', 'из', 'не', 'для', 'к', 'то'])
-    hashtags = [f"#{word}" for word, freq in word_freq.most_common(10) if word not in common_words and len(word) > 3]
+    prompt += f"Теперь сгенерируйте метаданные для этого видео:\n"
+    prompt += f"Описание видео: {transcription}\n"
+    prompt += "Метаданные:"
     
-    return hashtags
+    return prompt
 
-def analyze_sentiment(text):
-    prompt = f"Проанализируйте эмоциональную окраску следующего текста и ответьте одним словом (positive, negative или neutral): {text}"
-    completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-32B-Instruct",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-    sentiment = completion.choices[0].message.content.strip().lower()
-    return sentiment if sentiment in ['positive', 'negative', 'neutral'] else 'neutral'
+if __name__ == '__main__':
+    # Настройка логирования
+    logging.basicConfig(level=logging.INFO)
 
-def determine_target_audience(text, video_events):
-    prompt = f"Определите целевую аудиторию для видео на основе следующего текста и объектов. Ответьте одним словом (дети, подростки, взрослые или пожилые_люди): Текст: {text}, Объекты: {[obj['label'] for event in video_events for obj in event['detected_objects']]}"
-    completion = client.chat.completions.create(
-        model="Qwen/Qwen2.5-32B-Instruct",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-    target_audience = completion.choices[0].message.content.strip().lower()
-    valid_audiences = ['дети', 'подростки', 'взрослые', 'пожилые_люди']
-    return target_audience if target_audience in valid_audiences else 'general'
+    sample_transcription = "Зрителей настиг потоп из -за тропического ливня, который накрыл курортный город. Ну, всякое журналистское быдло и дебилы будут объяснять это погодой. А я скажу, что Стас Михайлов просто решил экранизировать моё любимое аниме Детройт Метал Сити. Смотрите! Токийская башня потекла! Токийская башня кончила!"
+
+    metadata = generate_metadata_json(sample_transcription)
+    print("Сгенерированные метаданные:")
+    print(json.dumps(metadata, ensure_ascii=False, indent=2))
