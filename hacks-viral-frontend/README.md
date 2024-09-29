@@ -1,7 +1,3 @@
-Here’s how you can structure the README with two images displayed in a horizontal table and instructions on how to run the application:
-
----
-
 ## Upload Page Preview
 
 <table>
