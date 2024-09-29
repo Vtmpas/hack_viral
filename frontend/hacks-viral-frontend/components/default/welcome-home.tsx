@@ -21,7 +21,7 @@ export default function WelcomeHome() {
                 data-aos="fade-up"
                 data-aos-delay={200}
               >
-                Больше вам не нужно самостоятельно вырезать самые запоминающиеся моменты в видео, наш AI сделает все сам.
+                Больше вам не придется самостоятельно вырезать самые запоминающиеся моменты в видео, наш AI сделает это за вас.
               </p>
               <div className="mx-auto max-w-xs sm:flex sm:max-w-none sm:justify-center">
                 <div data-aos="fade-up" data-aos-delay={400}>
@@ -30,7 +30,7 @@ export default function WelcomeHome() {
                     href="upload/"
                   >
                     <span className="relative inline-flex items-center">
-                      Неповторимый оригинал
+                      Генерация клипов
                       <span className="ml-1 tracking-normal text-white/50 transition-transform group-hover:translate-x-0.5">
                         -&gt;
                       </span>
@@ -40,9 +40,11 @@ export default function WelcomeHome() {
                 <div data-aos="fade-up" data-aos-delay={600}>
                   <a
                     className="btn relative w-full bg-gradient-to-b from-gray-800 to-gray-800/60 bg-[length:100%_100%] bg-[bottom] text-gray-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:border before:border-transparent before:[background:linear-gradient(to_right,theme(colors.gray.800),theme(colors.gray.700),theme(colors.gray.800))_border-box] before:[mask-composite:exclude_!important] before:[mask:linear-gradient(white_0_0)_padding-box,_linear-gradient(white_0_0)] hover:bg-[length:100%_150%] sm:ml-4 sm:w-auto"
-                    href="https://vizard.ai/"
+                    href="https://github.com/Vtmpas/hack_viral"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    Дешевая подделка
+                    GitHub
                   </a>
                 </div>
               </div>
@@ -54,7 +56,7 @@ export default function WelcomeHome() {
             thumbWidth={1104}
             thumbHeight={576}
             thumbAlt="Modal video thumbnail"
-            video="videos//demo.mp4"
+            video="/videos/demo.mp4"  // Исправленный путь к видео
             videoWidth={1920}
             videoHeight={1080}
           />

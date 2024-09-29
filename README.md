@@ -30,6 +30,6 @@ docker compose up --build -d
 ```
 ### 4. Запуск frontend 
 ```bash
-cd hacks-viral-frontend
+cd frontend
 docker compose up -d --build
 ```

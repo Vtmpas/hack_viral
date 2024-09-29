@@ -22,74 +22,74 @@ export default function Footer() {
         <div className="grid grid-cols-2 justify-between gap-12 py-8 sm:grid-rows-[auto_auto] md:grid-cols-4 md:grid-rows-[auto_auto] md:py-12 lg:grid-cols-[repeat(4,minmax(0,140px))_1fr] lg:grid-rows-1 xl:gap-20">
           {/* 1st block */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-200">Product</h3>
+            <h3 className="text-sm font-medium text-gray-200">Продукт</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/features"
                 >
-                  Features
+                  Функции
                 </a>
               </li>
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/integrations"
                 >
-                  Integrations
+                  Интеграции
                 </a>
               </li>
             </ul>
           </div>
           {/* 2nd block */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-200">Company</h3>
+            <h3 className="text-sm font-medium text-gray-200">Компания</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/about-us"
                 >
-                  About us
+                  О нас
                 </a>
               </li>
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/blog"
                 >
-                  Blog
+                  Блог
                 </a>
               </li>
             </ul>
           </div>
           {/* 3rd block */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-200">Resources</h3>
+            <h3 className="text-sm font-medium text-gray-200">Ресурсы</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/community"
                 >
-                  Community
+                  Сообщество
                 </a>
               </li>
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/terms-of-service"
                 >
-                  Terms of service
+                  Условия использования
                 </a>
               </li>
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/report-a-vulnerability"
                 >
-                  Report a vulnerability
+                  Сообщить о уязвимости
                 </a>
               </li>
             </ul>
@@ -97,15 +97,15 @@ export default function Footer() {
           {/* 4th block */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-gray-200">
-              Content Library
+              Библиотека контента
             </h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#0"
+                  href="/knowledge-base"
                 >
-                  Knowledge base
+                  База знаний
                 </a>
               </li>
             </ul>
@@ -121,9 +121,9 @@ export default function Footer() {
                 <span className="text-gray-700"> · </span>
                 <a
                   className="text-indigo-200/65 transition hover:text-indigo-500"
-                  href="#terms"
+                  href="/terms-of-service"
                 >
-                  Terms
+                  Условия
                 </a>
               </p>
               <ul className="inline-flex gap-1">
@@ -160,7 +160,7 @@ export default function Footer() {
                 <li>
                   <a
                     className="flex items-center justify-center text-indigo-500 transition hover:text-indigo-400"
-                    href="#0"
+                    href="https://github.com/Vtmpas/hack_viral"
                     aria-label="Github"
                   >
                     <svg

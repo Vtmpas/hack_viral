@@ -1,0 +1,14 @@
+.video-container {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.video-player {
+  width: 100%;
+  height: auto;
+  max-height: 80vh; /* Ensure the video doesn't exceed 80% of the viewport height */
+}

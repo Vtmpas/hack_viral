@@ -118,8 +118,9 @@ export default function VideoPlayer({
             >
               <video
                 ref={videoRef}
-                width={videoWidth}
-                height={videoHeight}
+                width="100%"
+                height="100%"
+                style={{ maxWidth: '100%', maxHeight: '100%' }}
                 loop
                 controls
               >
