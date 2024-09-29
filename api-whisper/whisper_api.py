@@ -15,12 +15,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Determine if CUDA is available for model acceleration
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logging.info(f"Device selected: {device}")
-print(f"Device selected: {device}")
 
 # Load the Whisper model
 model = whisper.load_model("base", device=device)
 logging.info("Whisper model loaded")
-print("Whisper model loaded")
 
 # Define a Pydantic model for request validation
 class Request(BaseModel):
@@ -41,7 +39,6 @@ def split_subs_by_words(result):
             subtitles.append(word_info)
     
     logging.info("Word-level subtitles generated")
-    print("Word-level subtitles generated")
     
     return subtitles
 
@@ -51,7 +48,6 @@ def split_subs_by_sentences(result):
     Convert JSON from Whisper to a sentence-level subtitle format.
     '''
     logging.info("Splitting subtitles by sentences")
-    print("Splitting subtitles by sentences")
     
     subtitles = []
     current_sentence = []
@@ -109,7 +105,6 @@ async def get_subtitles(audio: UploadFile = File(...)):
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         try:
             logging.info("Saving audio file to temporary location")
-            print("Saving audio file to temporary location")
             
             # Write the audio data to the temporary file
             audio_data = await audio.read()
@@ -117,18 +112,15 @@ async def get_subtitles(audio: UploadFile = File(...)):
             temp_file_path = temp_file.name  # Get the temporary file path
         except Exception as e:
             logging.error(f"Error saving audio to temp file: {str(e)}")
-            print(f"Error saving audio to temp file: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error saving audio to temp file: {str(e)}")
 
     # Transcribe the audio using Whisper
     try:
         logging.info("Starting transcription using Whisper")
-        print("Starting transcription using Whisper")
         
         subtitles = model.transcribe(temp_file_path, word_timestamps=True)  # Pass the temp file path to the model
         
         logging.info("Transcription completed")
-        print("Transcription completed")
     except Exception as e:
         logging.error(f"Error transcribing audio with Whisper: {str(e)}")
         print(f"Error transcribing audio with Whisper: {str(e)}")
@@ -138,14 +130,12 @@ async def get_subtitles(audio: UploadFile = File(...)):
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)  # Delete the temporary file
             logging.info("Temporary audio file deleted")
-            print("Temporary audio file deleted")
 
     # Generate sentence-level and word-level subtitles
     sentences = split_subs_by_sentences(subtitles.copy())
     words = split_subs_by_words(subtitles.copy())
 
     logging.info("Returning subtitles response")
-    print("Returning subtitles response")
     
     return {
         'sentences': sentences,
