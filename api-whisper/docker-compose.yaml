@@ -1,0 +1,20 @@
+version: '3.8'  # Specify the version for compatibility
+
+services:
+  api:
+    # image: videoteam-vm-2/whisper_api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    entrypoint: uvicorn whisper_api:app --host 0.0.0.0 --port 8000
+    ports:
+      - "${APP_PORT:-8000}:8000"  # Fallback to 8000 if APP_PORT is not set
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['1']
+              capabilities: [gpu]
