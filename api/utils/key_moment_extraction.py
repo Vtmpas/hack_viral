@@ -55,6 +55,10 @@ def extract_key_moments_advanced(transcription, num_clips=4, clip_len=15, labels
                 text = text + ' ' + transcription[right_ind]['text']
                 pass
     words_for_clips = []
+    for i in range(len(clips)):
+        if clips[i]['end'] + clips[i]['start'] >= clip_len + 7:
+            clips[i]['end'] = clips[i]['start'] + clip_len + 7
+
     if words is not None:
         for clip in clips:
             words_for_clip = []

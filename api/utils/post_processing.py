@@ -7,6 +7,7 @@ import moviepy.editor as mpe
 from moviepy.editor import *
 import cv2
 from moviepy.video.fx.all import crop
+
 def get_video_metadata(video_path):
     # Run ffprobe command
     command = [
@@ -17,6 +18,8 @@ def get_video_metadata(video_path):
     # Parse the result as JSON
     metadata = json.loads(result.stdout)
     return metadata
+
+
 
 def save_video(clips, video_path, cache_dir):
     paths = []
@@ -76,6 +79,13 @@ def save_video(clips, video_path, cache_dir):
             paths.append(output_file)  
     return paths
 
+def get_color(word):
+    if len(word) >= 4:
+        if np.random.binomial(1, 0.15):
+            return 'red'
+        if np.random.binomial(1, 0.2):
+            return 'yellow'
+    return 'white'
 
 def crop_video_to_9_16(input_video_path, output_video_path, background_audio_path=None, target_aspect_ratio=9/16, words=None):
     if 1:
@@ -88,7 +98,7 @@ def crop_video_to_9_16(input_video_path, output_video_path, background_audio_pat
         if words is not None:
             texts = []
             for i in range(len(words)):
-                text = TextClip(words[i]['text'], fontsize=40, color='white', font="Lane",)
+                text = TextClip(words[i]['text'], fontsize=40, color=get_color(words[i]['text']), font="Lane",)
 
                 # Set the duration for which the text will be visible
                 text = text.set_duration(words[i]['end'] - words[i]['start'])  # Visible for 5 seconds
