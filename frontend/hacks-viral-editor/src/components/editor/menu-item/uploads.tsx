@@ -124,7 +124,7 @@ export const Uploads = () => {
 
   const fetchVideo = async (videoId: string, clipNum: number) => {
     try {
-      const response = await axios.get(`http://195.242.25.2:8009/api/part`, { //195.242.25.2:8009
+      const response = await axios.get(`http://195.242.25.2:8009/api/part`, {
         params: {
           videoId,
           clipsNum: clipNum,
