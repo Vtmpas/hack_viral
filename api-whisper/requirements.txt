@@ -1,0 +1,10 @@
+python-multipart
+requests
+fastapi
+uvicorn
+moviepy
+torch
+torchaudio
+pydantic
+numpy
+git+https://github.com/openai/whisper.git    # Whisper model for speech recognition
