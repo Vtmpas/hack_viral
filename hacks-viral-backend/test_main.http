@@ -1,0 +1,24 @@
+# Test your FastAPI endpoints
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+###
+
+GET http://127.0.0.1:8000/hello/User
+Accept: application/json
+###
+
+POST http://127.0.0.1:8000/api/upload?video_id=test_video
+Content-Type: multipart/form-data
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="test.mp4"
+Content-Type: video/mp4
+
+< ./path/to/your/test.mp4
+--boundary--
+###
+
+GET http://127.0.0.1:8000/api/generate?video_id=test_video
+Accept: application/json
+###

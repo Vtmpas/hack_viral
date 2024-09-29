@@ -1,0 +1,32 @@
+services:
+  frontend:
+    build:
+      context: ./hacks-viral-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - editor
+
+  backend:
+    build:
+      context: ./hacks-viral-backend
+    ports:
+      - "8000:8000"
+
+  editor:
+    build:
+      context: ./hacks-viral-editor
+    ports:
+      - "4173:4173"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+      - editor
