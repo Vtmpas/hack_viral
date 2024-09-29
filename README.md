@@ -1,11 +1,13 @@
 # Создание виральных клипов
 
-## Upload Page Preview
-
 <table>
   <tr>
-    <td><img src="assets/start_page.jpg" alt="start_page.jpg_preview" width="400"/></td>
+    <td><img src="assets/start_page.jpg" alt="start_page_preview" width="400"/></td>
     <td><img src="assets/upload_page.jpg" alt="upload_page_preview" width="400"/></td>
+  </tr>
+  <tr>
+    <td><img src="assets/progress.jpg" alt="progress_preview" width="400"/></td>
+    <td><img src="assets/result.jpg" alt="result_preview" width="400"/></td>
   </tr>
 </table>
 
