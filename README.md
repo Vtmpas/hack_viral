@@ -1,7 +1,5 @@
 # Создание виральных клипов
 
-## Upload Page Preview
-
 <table>
   <tr>
     <td><img src="assets/start_page.jpg" alt="start_page_preview" width="400"/></td>
