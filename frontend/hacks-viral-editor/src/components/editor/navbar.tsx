@@ -19,6 +19,7 @@ import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
 import { download } from '@/utils/download';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 const baseUrl = 'https://renderer.designcombo.dev';
 //  https://renderer.designcombo.dev/status/{id}
@@ -26,11 +27,17 @@ const baseUrl = 'https://renderer.designcombo.dev';
 export default function Navbar() {
   const [videoTitle, setVideoTitle] = useState('Untitled video');
 
+  const location = useLocation(); // Use useLocation to get the current URL
+  const queryParams = new URLSearchParams(location.search);
+  const videoId = queryParams.get('videoId') || '';
+  const clipsNum = parseInt(queryParams.get('clipsNum') || '0', 10);
+
+  // Отладочные сообщения для проверки параметров
+  console.log('Parsed URL params:', { videoId, clipsNum });
+
   useEffect(() => {
     const fetchVideoTitle = async () => {
       try {
-        const videoId = 'your_video_id'; // Замените на ваш videoId
-        const clipsNum = 'your_clips_num'; // Замените на ваш clipsNum
         const response = await axios.get(`http://195.242.25.2:8009/api/meta`, {
           params: { videoId, clipsNum },
         });
