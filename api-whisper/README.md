@@ -23,3 +23,37 @@ if response.status_code == 200:
 else:
     print(f"Error: {response.status_code} - {response.text}")
 ```
+
+## Example Output
+
+```
+{
+    "sentences": [
+        {
+            "text": "Один Два Три",
+            "start": 3.44,
+            "end": 5.64
+        }
+    ],
+    "words": [
+        {
+            "start": 3.44,
+            "end": 3.98,
+            "probability": 0.554,
+            "text": "Один"
+        },
+        {
+            "start": 3.98,
+            "end": 4.98,
+            "probability": 0.898,
+            "text": "Два"
+        },
+        {
+            "start": 4.98,
+            "end": 5.64,
+            "probability": 0.936,
+            "text": "Три"
+        }
+    ]
+}
+```
